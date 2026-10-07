@@ -45,18 +45,11 @@ jobs:
       - name: Build
         run: scripts/build.sh
 
-      - name: Verify BTF
-        run: scripts/verify.sh
-
-      - name: Disk after
-        if: always()
-        run: df -h / "$GITHUB_WORKSPACE"; du -sh build/linux-* 2>/dev/null || true
-
       - name: Collect
-        run: |
-          cp build/out/metadata.json build/out/buildinfo.txt build/out/SHA256SUMS . 2>/dev/null || true
-          ls -l build/out
+        run: ls -l build/out
 
+      # Uploaded before verification on purpose: a failed check must leave the
+      # packages inspectable, and a re-run of verify must not need a rebuild.
       - uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ github.sha }}
@@ -68,6 +61,13 @@ jobs:
             build/out/config-*
           if-no-files-found: error
           retention-days: 14
+
+      - name: Verify BTF
+        run: scripts/verify.sh
+
+      - name: Disk after
+        if: always()
+        run: df -h / "$GITHUB_WORKSPACE"; du -sh build/linux-* 2>/dev/null || true
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')

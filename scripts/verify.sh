@@ -39,8 +39,13 @@ log "kernel image: $(basename "$KIMG") ($(stat -c %s "$KIMG") bytes)"
 if file "$KIMG" | grep -q gzip; then gzip -dc "$KIMG" > "$TMP/Image"; else cp "$KIMG" "$TMP/Image"; fi
 check sh -c "grep -obUaP '\x9f\xeb\x01\x00' '$TMP/Image' | head -1 | grep -q ." "raw BTF magic present in the kernel Image"
 
-MOD="$(find "$TMP/lib/modules" -name 'macb.ko*' | head -1)"
-[[ -n "$MOD" ]] || MOD="$(find "$TMP/lib/modules" -name '*.ko*' | head -1)"
+# merged-/usr packages ship modules under usr/lib/modules; older ones under lib/modules
+MODROOT=""
+for d in "$TMP/usr/lib/modules" "$TMP/lib/modules"; do [[ -d "$d" ]] && MODROOT="$d" && break; done
+[[ -n "$MODROOT" ]] || die "no modules directory in the package"
+MOD="$(find "$MODROOT" -name 'macb.ko*' | head -1)"
+[[ -n "$MOD" ]] || MOD="$(find "$MODROOT" -name '*.ko*' | head -1)"
+[[ -n "$MOD" ]] || die "no modules found under $MODROOT"
 case "$MOD" in
   *.ko.xz)  xz -dc "$MOD" > "$TMP/mod.ko" ;;
   *.ko.zst) zstd -dcq "$MOD" > "$TMP/mod.ko" ;;
