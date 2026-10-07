@@ -12,9 +12,12 @@ on the Pi 5. So: same kernel, same config, same `uname -r`, plus BTF.
 
 ## Status
 
-Pipeline written, first build pending. `docs/building.md` describes the
-scripts and how to run them locally; `docs/plan.md` is the plan they
-implement. A version table appears below once a release exists.
+Building and releasing. `docs/building.md` describes the scripts and how to
+run them locally; `docs/plan.md` is the plan they implement.
+
+| Release | Pi OS source | Linux commit | Flavour | Built |
+|---|---|---|---|---|
+| [v6.18.50-1+rpt1+btf1](https://github.com/tsisar/rpi-kernel-btf/releases/tag/v6.18.50-1%2Brpt1%2Bbtf1) | `1:6.18.50-1+rpt1` | `cff533aec2fa` | 2712 | 2026-10-07, 1 h 54 min |
 
 ## Layout
 
