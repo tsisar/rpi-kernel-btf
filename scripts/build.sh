@@ -49,6 +49,9 @@ fakeroot make -f debian/rules.gen "${targets_binary[@]}"
 end=$(date +%s)
 mkdir -p "$OUT_DIR"
 mv "$BUILD_DIR"/*.deb "$OUT_DIR"/ 2>/dev/null || true
+# the meta sub-target also emits the -dbg metapackage; it depends on a package
+# this build never produces, so it must not reach a release
+rm -f "$OUT_DIR"/linux-image-rpi-*-dbg_*.deb
 cp "$SOURCE_DIR/debian/build/build_arm64_rpi_${FLAVOUR}/.config" "$OUT_DIR/config-${FLAVOUR}" 2>/dev/null || true
 
 # build info for the release
