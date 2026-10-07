@@ -12,9 +12,9 @@ on the Pi 5. So: same kernel, same config, same `uname -r`, plus BTF.
 
 ## Status
 
-Not built yet. `docs/plan.md` is the implementation plan; the scripts and the
-GitHub Actions workflow are being written against it. Nothing in this README
-describes a working release until a version table appears below.
+Pipeline written, first build pending. `docs/building.md` describes the
+scripts and how to run them locally; `docs/plan.md` is the plan they
+implement. A version table appears below once a release exists.
 
 ## Layout
 

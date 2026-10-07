@@ -1,0 +1,89 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+    paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
+  pull_request:
+    paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# A two-hour kernel build per event: one run per ref at a time, superseded
+# runs are cancelled (a tag build is never cancelled by a later push).
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  kernel:
+    # Native arm64 build on a hosted runner, inside the same distribution the
+    # Pi OS packages target, so the toolchain matches (gcc 14, dwarves 1.30).
+    runs-on: ubuntu-24.04-arm
+    container: debian:trixie
+    timeout-minutes: 360
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install git, lint and packaging tools
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends \
+            git ca-certificates curl shellcheck \
+            dpkg-dev make python3 python3-dacite python3-jinja2 kernel-wedge quilt >/dev/null
+
+      - uses: actions/checkout@v4
+
+      - name: Lint
+        run: shellcheck -x scripts/*.sh
+
+      - name: Disk before
+        run: df -h / "$GITHUB_WORKSPACE"
+
+      - name: Fetch source package
+        run: scripts/fetch.sh
+
+      - name: Prepare (BTF fragment, +btf changelog, regenerate control)
+        run: scripts/prepare.sh
+
+      - name: Build
+        run: scripts/build.sh
+
+      - name: Collect
+        run: ls -l build/out
+
+      # Uploaded before verification on purpose: a failed check must leave the
+      # packages inspectable, and a re-run of verify must not need a rebuild.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kernel-${{ github.sha }}
+          path: |
+            build/out/*.deb
+            build/out/SHA256SUMS
+            build/out/metadata.json
+            build/out/buildinfo.txt
+            build/out/config-*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify BTF
+        run: scripts/verify.sh
+
+      - name: Disk after
+        if: always()
+        run: df -h / "$GITHUB_WORKSPACE"; du -sh build/linux-* 2>/dev/null || true
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/out/*.deb
+            build/out/SHA256SUMS
+            build/out/metadata.json
+            build/out/buildinfo.txt
+            build/out/config-*
+          body_path: build/out/buildinfo.txt

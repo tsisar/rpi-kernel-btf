@@ -1,8 +1,9 @@
 # Appended to debian/config/arm64/rpi/config.2712 of the Raspberry Pi OS kernel
-# source package. DWARF is needed by pahole to encode BTF; it stays in the
-# build-tree vmlinux only, the installed Image grows by the BTF section alone.
+# source package (last file in the flavour's KCONFIG list, so it wins).
+# DWARF is needed by pahole to encode BTF; it stays in the build-tree objects
+# (compressed, to fit a hosted runner's disk), the installed Image only grows
+# by the BTF section itself.
 CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y
+CONFIG_DEBUG_INFO_COMPRESSED_ZLIB=y
 CONFIG_DEBUG_INFO_BTF=y
 CONFIG_DEBUG_INFO_BTF_MODULES=y
-# CONFIG_DEBUG_INFO_REDUCED is not set
-# CONFIG_DEBUG_INFO_COMPRESSED_NONE is not set
