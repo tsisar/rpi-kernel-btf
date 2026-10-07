@@ -1,0 +1,17 @@
+# build inputs and outputs — fetched / produced by the scripts, never committed
+build/
+*.deb
+*.dsc
+*.tar.xz
+*.buildinfo
+*.changes
+SHA256SUMS
+
+# local tooling credentials
+.secrets/
+.env
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
