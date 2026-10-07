@@ -89,10 +89,12 @@ BTF options and a version suffix.
 - **`dwarves` ≥ 1.22** for `pahole` (BTF encoding). trixie has 1.30. Not in
   the Pi `.dsc` Build-Depends (they never build BTF) — install it explicitly;
   the kernel's `scripts/pahole-version.sh` check fails the build otherwise.
-- Disk: source tree + objects + DWARF `vmlinux` ≈ 8–12 GB (expected). Time on
-  a 4-vCPU arm64 runner: 60–90 min for the 2712 flavour alone (expected;
-  measure). Native on a Pi 5: 2–3 h — possible but it loads a cluster node,
-  so CI is the primary path and a local x86 cross-build the fallback.
+- Measured (2026-10-07, run 37604349549, `ubuntu-24.04-arm`, 4 jobs, gcc
+  14.2.0, pahole 1.30): the 2712 flavour builds in **6 862 s (1 h 54 min)**;
+  the source tree with zlib-compressed DWARF objects is **11 GB**; the runner
+  offers 145 GB, so disk is not a constraint. The image package is 43 MB
+  (`vmlinuz` 11.9 MB with BTF). Native on a Pi 5 would take 2–3 h and load a
+  cluster node, so CI is the primary path and a local cross-build the fallback.
 
 ### Building one flavour only
 
@@ -148,9 +150,9 @@ rpi-kernel-btf/
   version, build date).
 - ccache on the runner cache to shorten rebuilds (same upstream version, new
   `+btfN`) — optional, measure first.
-- Runner limits to check on the first run: 6 h job limit (fine), ~14 GB free
-  disk on the runner (tight with DWARF — clean `/usr/share/dotnet`, Android
-  SDK etc. first, or build in `/mnt`).
+- Runner limits, checked on the first run: 6 h job limit (the build takes
+  under 2 h) and 145 GB of disk with 96 GB free after the build — no cleanup
+  step needed.
 
 ### Verification (in CI, before anything reaches a node)
 

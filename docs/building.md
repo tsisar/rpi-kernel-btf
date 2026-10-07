@@ -8,7 +8,7 @@ the same steps work locally in a container.
 |---|---|---|
 | `scripts/fetch.sh` | Downloads `.dsc`, `orig.tar.xz`, `debian.tar.xz` for the version in `VERSION` into `build/`, verifies sha256 against the `.dsc` | `curl` |
 | `scripts/prepare.sh` | `dpkg-source -x`; appends `config/<flavour>.btf` to `debian/config/arm64/rpi/config.<flavour>`; rewrites the top changelog stanza's version to `+btf`; regenerates `debian/control` / `rules.gen`; writes `build/out/metadata.json` | `dpkg-dev`, `python3-dacite`, `python3-jinja2`, `kernel-wedge`, `quilt` (the `.dsc` Build-Depends) |
-| `scripts/build.sh` | Installs build-deps + `dwarves`; `source` → `build-arch_arm64_rpi_<flavour>_{base,headers,image,meta}` → `binary-arch_…` + `binary-indep_rpi_headers-common`; collects `*.deb`, `SHA256SUMS`, `buildinfo.txt` | root, arm64, ~2–3 h on 4 cores |
+| `scripts/build.sh` | Installs build-deps + `dwarves`; `source` → `build-arch_arm64_rpi_<flavour>_{base,headers,image,meta}` → `binary-arch_…` + `binary-indep_rpi_headers-common`; collects `*.deb`, `SHA256SUMS`, `buildinfo.txt` | root, arm64; 1 h 54 min on the 4-core hosted runner |
 | `scripts/verify.sh` | `.BTF` section in the build-tree `vmlinux` (parsed by `bpftool`), raw BTF magic `9f eb 01 00` in the shipped `Image`, `.BTF` in a module, `CONFIG_DEBUG_INFO_BTF=y` in the shipped config, package name/version as planned | `bpftool`, `binutils` |
 
 Settings (environment): `FLAVOUR` (default `2712`), `BTF_SUFFIX` (default
@@ -27,9 +27,11 @@ scripts/build.sh
 scripts/verify.sh
 ```
 
-`build/` is git-ignored. A full build needs roughly 25 GB free: the source
-tree with compressed DWARF objects dominates, the packages themselves are
-under 200 MB.
+`build/` is git-ignored. A build needs about 12 GB free: the source tree with
+compressed DWARF objects is 11 GB, the packages together are under 60 MB.
+On macOS, keep `BUILD_DIR` on a Docker volume (`-v rpi-kernel-build:/build
+-e BUILD_DIR=/build`): the Linux tree has paths that differ only by case,
+which a bind-mounted case-insensitive filesystem cannot extract.
 
 ## What is and is not built
 
