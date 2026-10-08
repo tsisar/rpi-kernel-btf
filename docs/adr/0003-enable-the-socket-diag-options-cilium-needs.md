@@ -20,6 +20,15 @@ and keeps running without the feature: a client holding a UDP "connection"
 (DNS, for one) to a backend that went away keeps sending into the void until
 it times out on its own.
 
+Upstream, this is a Cilium regression rather than a kernel requirement:
+1.19.7 introduced a BPF socket destroyer that works without the diag options,
+and 1.20.0 (PR #42867) gated the whole feature on a netlink
+`CONFIG_INET_DIAG_DESTROY` probe — cilium/cilium#49009 (open, 2026-09-25)
+proposes probing `bpf_sock_destroy` first. Nobody has asked Raspberry Pi to
+enable the options (no issue, PR or defconfig change mentions them); both are
+`default n` in Kconfig and Debian's own kernel sets `INET_UDP_DIAG=m`,
+`INET_DIAG_DESTROY=y`.
+
 This repository already carries a config fragment for the one option Pi OS
 lacks; the question is whether it may carry more than BTF.
 
