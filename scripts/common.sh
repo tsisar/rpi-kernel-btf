@@ -3,7 +3,9 @@
 #
 # Inputs:
 #   VERSION file   - Pi OS source version, e.g. 6.18.50-1+rpt1
-#   BTF_SUFFIX     - local version suffix appended to it (default: +btf1)
+#   SUFFIX file    - local version suffix appended to it, e.g. +btf2 (a rebuild of
+#                    the same Pi OS version with a changed fragment bumps it)
+#   BTF_SUFFIX     - overrides the SUFFIX file (default: +btf1 when neither is set)
 #   FLAVOUR        - Pi OS kernel flavour to build (default: 2712)
 #   BUILD_DIR      - working directory (default: ./build)
 # shellcheck disable=SC2034  # variables are consumed by the sourcing scripts
@@ -12,7 +14,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-$REPO_DIR/build}"
 FLAVOUR="${FLAVOUR:-2712}"
-BTF_SUFFIX="${BTF_SUFFIX:-+btf1}"
+BTF_SUFFIX="${BTF_SUFFIX:-$( [[ -f "$REPO_DIR/SUFFIX" ]] && tr -d "[:space:]" < "$REPO_DIR/SUFFIX" || echo +btf1 )}"
 ARCHIVE_URL="${ARCHIVE_URL:-http://archive.raspberrypi.com/debian/pool/main/l/linux}"
 
 PIOS_VERSION="$(tr -d '[:space:]' < "$REPO_DIR/VERSION")"       # 6.18.50-1+rpt1

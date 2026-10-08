@@ -11,8 +11,10 @@ the same steps work locally in a container.
 | `scripts/build.sh` | Installs build-deps + `dwarves`; `source` → `build-arch_arm64_rpi_<flavour>_{base,headers,image,meta}` → `binary-arch_…` + `binary-indep_rpi_headers-common`; collects `*.deb`, `SHA256SUMS`, `buildinfo.txt` | root, arm64; 1 h 54 min on the 4-core hosted runner |
 | `scripts/verify.sh` | `.BTF` section in the build-tree `vmlinux` (parsed by `bpftool`), raw BTF magic `9f eb 01 00` in the shipped `Image`, `.BTF` in a module, `CONFIG_DEBUG_INFO_BTF=y` in the shipped config, package name/version as planned | `bpftool`, `binutils` |
 
-Settings (environment): `FLAVOUR` (default `2712`), `BTF_SUFFIX` (default
-`+btf1`), `BUILD_DIR` (default `./build`), `JOBS` (default `nproc`),
+Inputs: `VERSION` (the Pi OS source version) and `SUFFIX` (the local suffix,
+`+btfN`; bump it when the fragment changes for the same Pi OS version).
+Settings (environment): `FLAVOUR` (default `2712`), `BTF_SUFFIX` (overrides
+`SUFFIX`), `BUILD_DIR` (default `./build`), `JOBS` (default `nproc`),
 `SKIP_DEPS=1` to skip the apt steps in `build.sh`.
 
 ## Locally
@@ -43,8 +45,8 @@ Only flavour `2712` (Pi 5, 16K pages) and only its `base`, `headers`,
 
 ## Releasing
 
-Tag the commit `v<VERSION><BTF_SUFFIX>`, e.g. `v6.18.50-1+rpt1+btf1`; the
+Tag the commit `v<VERSION><SUFFIX>`, e.g. `v6.18.50-1+rpt1+btf2`; the
 workflow attaches the packages, `SHA256SUMS`, `metadata.json`, `buildinfo.txt`
 and the resolved kernel config to the GitHub Release. A new Pi OS upload is
-followed by bumping `VERSION` and tagging again; a rebuild of the same version
-bumps `BTF_SUFFIX` (`+btf2`).
+followed by bumping `VERSION` (and resetting `SUFFIX` to `+btf1`) and tagging
+again; a rebuild of the same version bumps `SUFFIX`.

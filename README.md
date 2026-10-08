@@ -20,7 +20,8 @@ implement. A version table appears below once a release exists.
 
 ```
 VERSION                     # the Pi OS source version to build, e.g. 6.18.50-1+rpt1
-config/2712.btf             # config fragment appended to the 2712 flavour
+SUFFIX                      # local suffix, +btfN; bumped for a rebuild of the same version
+config/2712.btf             # config fragment appended to the 2712 flavour (BTF + socket diag)
 scripts/fetch.sh            # .dsc + tarballs from archive.raspberrypi.com, sha256 from the .dsc
 scripts/prepare.sh          # dpkg-source -x, append fragment, dch --local +btf
 scripts/build.sh            # build-dep + dwarves, build the 2712 flavour, collect *.deb
